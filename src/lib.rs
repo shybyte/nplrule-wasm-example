@@ -1,6 +1,8 @@
+use nlprule::{Rules, Tokenizer};
+use wasm_bindgen::prelude::*;
+
 mod utils;
 
-use wasm_bindgen::prelude::*;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -15,5 +17,19 @@ extern {
 
 #[wasm_bindgen]
 pub fn greet() {
+    let mut tokenizer_bytes: &'static [u8] = include_bytes!("../binaries/en_tokenizer.bin");
+    let mut rules_bytes: &'static [u8] = include_bytes!("../binaries/en_rules.bin");
+
+    let tokenizer =
+        Tokenizer::from_reader(&mut tokenizer_bytes).expect("tokenizer binary is valid");
+    // let rules = Rules::from_reader(&mut rules_bytes).expect("rules binary is valid");
+
+    // assert_eq!(
+    //     rules.correct("She was not been here since Monday.", &tokenizer),
+    //     String::from("She was not here since Monday.")
+    // );
+    //
+    // let corrected = rules.correct("She was not been here since Monday.", &tokenizer);
+
     alert("Hello, nplrule-wasm-example!!");
 }
