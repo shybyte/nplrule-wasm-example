@@ -15,5 +15,5 @@ extern {
 
 #[wasm_bindgen]
 pub fn greet() {
-    alert("Hello, nplrule-wasm-example!");
+    alert("Hello, nplrule-wasm-example!!");
 }
