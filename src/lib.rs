@@ -13,8 +13,6 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 extern "C" {
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
-
-    fn alert(s: &str);
 }
 
 #[wasm_bindgen]
@@ -44,17 +42,6 @@ impl NlpRuleChecker {
 
     pub fn check(&self, text: &str) -> JsValue {
         let suggestions = self.rules.suggest(text, &self.tokenizer);
-        for suggestion in &suggestions {
-            let suggestion_json = serde_json::to_string(&suggestion);
-            log(&format!(
-                "{} {}",
-                suggestion_json.unwrap(),
-                suggestion.message()
-            ));
-        }
-
-        log(&serde_json::to_string(&suggestions).unwrap());
-
         JsValue::from_serde(&suggestions).unwrap()
     }
 }
