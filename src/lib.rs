@@ -26,15 +26,14 @@ impl NlpRuleChecker {
     pub fn new() -> Self {
         utils::set_panic_hook();
 
-        let mut tokenizer_bytes: &'static [u8] = include_bytes!("../binaries/en_tokenizer.bin");
-        let mut rules_bytes: &'static [u8] = include_bytes!("../binaries/en_rules.bin");
+        let tokenizer_bytes: &'static [u8] = include_bytes!("../binaries/en_tokenizer.bin");
+        let rules_bytes: &'static [u8] = include_bytes!("../binaries/en_rules.bin");
 
         log("Init Tokenizer");
-        let tokenizer =
-            Tokenizer::from_reader(&mut tokenizer_bytes).expect("tokenizer binary is valid");
+        let tokenizer = Tokenizer::from_reader(tokenizer_bytes).expect("tokenizer binary is valid");
 
         log("Init Rules");
-        let rules = Rules::from_reader(&mut rules_bytes).expect("rules binary is valid");
+        let rules = Rules::from_reader(rules_bytes).expect("rules binary is valid");
 
         log("NlpRuleChecker is ready.");
         NlpRuleChecker { tokenizer, rules }
