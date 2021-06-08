@@ -3,7 +3,6 @@ use wasm_bindgen::prelude::*;
 
 mod utils;
 
-
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
 #[cfg(feature = "wee_alloc")]
@@ -11,27 +10,51 @@ mod utils;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-extern {
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+
     fn alert(s: &str);
 }
 
 #[wasm_bindgen]
-pub fn greet() {
-    utils::set_panic_hook();
+pub struct NlpRuleChecker {
+    tokenizer: Tokenizer,
+    rules: Rules,
+}
 
-    let mut tokenizer_bytes: &'static [u8] = include_bytes!("../binaries/en_tokenizer.bin");
-    let mut rules_bytes: &'static [u8] = include_bytes!("../binaries/en_rules.bin");
+#[wasm_bindgen]
+impl NlpRuleChecker {
+    pub fn new() -> Self {
+        utils::set_panic_hook();
 
-    let tokenizer =
-        Tokenizer::from_reader(&mut tokenizer_bytes).expect("tokenizer binary is valid");
-    let rules = Rules::from_reader(&mut rules_bytes).expect("rules binary is valid");
+        let mut tokenizer_bytes: &'static [u8] = include_bytes!("../binaries/en_tokenizer.bin");
+        let mut rules_bytes: &'static [u8] = include_bytes!("../binaries/en_rules.bin");
 
-    assert_eq!(
-        rules.correct("She was not been here since Monday.", &tokenizer),
-        String::from("She was not here since Monday.")
-    );
+        log("Init Tokenizer");
+        let tokenizer =
+            Tokenizer::from_reader(&mut tokenizer_bytes).expect("tokenizer binary is valid");
 
-    let corrected = rules.correct("She was not been here since Monday.", &tokenizer);
+        log("Init Rules");
+        let rules = Rules::from_reader(&mut rules_bytes).expect("rules binary is valid");
 
-    alert(&corrected);
+        log("NlpRuleChecker is ready.");
+        NlpRuleChecker { tokenizer, rules }
+    }
+
+    pub fn check(&self, text: &str) -> JsValue {
+        let suggestions = self.rules.suggest(text, &self.tokenizer);
+        for suggestion in &suggestions {
+            let suggestion_json = serde_json::to_string(&suggestion);
+            log(&format!(
+                "{} {}",
+                suggestion_json.unwrap(),
+                suggestion.message()
+            ));
+        }
+
+        log(&serde_json::to_string(&suggestions).unwrap());
+
+        JsValue::from_serde(&suggestions).unwrap()
+    }
 }
